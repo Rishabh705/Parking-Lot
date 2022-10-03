@@ -1,5 +1,5 @@
 #include <iostream>
-#include <string>
+#include <string.h>
 #include <vector>
 #include <algorithm>
 
@@ -23,12 +23,12 @@ public:
             empty_slots.push_back(i); // as initially all slots are empty.
         }
     }
-    void park(int sl = 0, string n = "", string clr = "") // park car of particular color = clr  and number = n at particular slot = s1
+    void park(string n = "", string clr = "") // park car of particular color = clr  and number = n at nearest slot.
     {
         int nearest = nearestSlot(empty_slots); // nearest available slot obtained
-        slots[0][nearest] = clr;
-        slots[1][nearest] = n;
-        slots[2][nearest] = to_string(sl);
+        slots[0].push_back(clr);
+        slots[1].push_back(n);
+        slots[2].push_back(to_string(nearest));
         auto it = find(empty_slots.begin(), empty_slots.end(), nearest);
         int index = it - empty_slots.begin();
         empty_slots.erase(empty_slots.begin() + index);
@@ -57,40 +57,33 @@ public:
 };
 class Details : public ParkingEntry
 {
-    string No, color;
     bool found = false;
 
 public:
-    Details(string n = "", string clr = "")
-    {
-        No = n;
-        color = clr;
-    }
-    void showReg(string clr)
-    {
-        cout << "Registration number :- \n";
-        for (size_t i = 0; i <= j; i++)
-        {
-            if (clr.compare(slots[0][i]) == 0)
-            {
-                cout << slots[2][i] << "\n";
-                found = true;
-            }
-        }
-        cout << "\n";
-        if (found == false)
-            cout << "Oops!..No such car present.\n";
-    }
-    void slot(string reg)
+    void findCar(string reg, int slot_number, bool flag)
     {
         found = false;
         for (size_t i = 0; i <= j; i++)
         {
-            if (reg.compare(slots[1][i]) == 0)
+            if (flag)
             {
-                cout << "Found slot is : " << stoi(slots[3][i]) << endl;
-                found = true;
-                break;
+                if (reg.compare(slots[1][i]) == 0)
+                {
+                    cout << "Car colour is : " << slots[0][i] << endl;
+                    cout << "Slot number is : " << stoi(slots[3][i]) << endl;
+                    found = true;
+                    break;
+                }
+            }
+            else
+            {
+                if (to_string(slot_number).compare(slots[2][i]) == 0)
+                {
+                    cout << "Car number is : " << slots[1][i] << endl;
+                    cout << "Car colour is : " << slots[0][i] << endl;
+                    found = true;
+                    break;
+                }
             }
         }
         if (found == false)
@@ -98,7 +91,7 @@ public:
             cout << "Oops!..No such slot found.\n";
         }
     }
-    void allSlots(string clr)
+    void findByClr(string clr)
     {
         found = false;
         cout << "Registration number\t\tSlot\n";
@@ -106,8 +99,9 @@ public:
         {
             if (clr.compare(slots[0][i]) == 0)
             {
-                cout << slots[2][i] << "\t\t" << stoi(slots[3][i]) << "\n";
+                cout << slots[1][i] << "\t\t" << stoi(slots[2][i]) << "\n";
                 found = true;
+                break;
             }
         }
         if (found == false)
@@ -120,22 +114,54 @@ int main(int argc, char *argv[])
 {
     string filename = argv[1];
     string extension = filename.substr(filename.length() - 4);
-    do
+    if (extension.compare("txt")) // file operation
     {
-        if (extension == "txt") // file operation
+    }
+    else
+    {
+        if (strcmp(argv[1], "create_parking_lot") == 0)
         {
+            int n = stoi(argv[2]);
+            ParkingEntry obj(n);
+            for (size_t i = 3; i < argc;)
+            {
+                if (argv[i] == "park")
+                {
+                    obj.park(argv[i + 1], argv[i + 2]);
+                    i += 3;
+                }
+                else if (argv[i] == "unpark")
+                {
+                    obj.unpark(argv[i + 1], argv[i + 2]);
+                    i += 3;
+                }
+                else if (argv[i] == "find_parking_slot")
+                {
+                    Details ob;
+                    ob.findCar("", stoi(argv[i + 1]), false);
+                    i += 2;
+                }
+                else if (argv[i] == "find_car_number")
+                {
+                    Details ob;
+                    ob.findCar(argv[i + 1], 0, true);
+                    i += 2;
+                }
+                else if (argv[i] == "find_car")
+                {
+                    Details ob;
+                    ob.findByClr(argv[i + 1]);
+                    i += 2;
+                }
+                else
+                {
+                    cout << "Error : Entered command is inappropriate\n";
+                    break;
+                }
+            }
         }
         else
-        {
-            if(argv[1]=="create_parking_lot")
-            {
-                int n = stoi(argv[2]);
-                ParkingEntry obj(n);
-
-            }
-            else
-                cout << "Error : Inappropriate command or Parking Lot not created\n";
-        }
-    }while(true);
+            cout << "Error : Inappropriate command or Parking Lot not created\n";
+    }
     return 0;
 }
