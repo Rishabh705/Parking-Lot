@@ -1,12 +1,45 @@
 #include <iostream>
 #include <fstream>
+#include <string.h>
 #include <vector>
 #include <algorithm>
-
+#include <cctype>
+#include <bits/stdc++.h>
 using namespace std;
 int j = 0;
 vector<vector<string>> slots;
-class ParkingEntry
+string colour[10] = {"red", "blue", "yellow", "green", "silver", "black", "white", "grey", "orange", "purple"};
+string lower(string str1)
+{
+    for (int i = 0; i < str1.length(); i++)
+        str1[i] = tolower(str1[i]);
+    return str1;
+}
+int countWords(string line)
+{
+    stringstream stream(line);
+    return distance(istream_iterator<string>(stream), istream_iterator<string>());
+}
+class Valid
+{
+protected:
+    bool checkNumber(string reg)
+    {
+        if (reg.length() != 9)
+            return false;
+        if (isdigit(reg[0]) && isdigit(reg[1]) && isdigit(reg[4]) && isalpha(reg[2]) && isalpha(reg[3]) && isalpha(reg[5]) && isalpha(reg[6]) && isalpha(reg[7]) && isalpha(reg[8]))
+            return false;
+        return true;
+    }
+    bool checkColour(string clr)
+    {
+        for (size_t i = 0; i < 12; i++)
+            if (((lower(clr).compare(lower(colour[i]))) == 0 | lower(clr).compare(lower(colour[i])) == 0))
+                return true;
+        return false;
+    }
+};
+class ParkingEntry : Valid
 {
     vector<int> empty_slots;
 
@@ -18,23 +51,41 @@ public:
         for (int i = 0; i < 3; i++)
             slots.push_back(vector<string>()); // Add an empty row
     }
-
+    bool exists(string reg)
+    {
+        for (size_t i = 0; i < slots[1].size(); i++)
+        {
+            if (reg.compare(slots[1][i]) == 0)
+                return true;
+        }
+        return false;
+    }
     void park(string n, string clr, int l) // park car of particular color = clr  and number = n at nearest slot.
     {
-        if (j < l)
+        if (checkNumber(n) && checkColour(clr))
         {
-            int nearest = *min_element(empty_slots.begin(), empty_slots.end()); // nearest available slot obtained
-            slots[0].push_back(clr);
-            slots[1].push_back(n);
-            slots[2].push_back(to_string(nearest));
-            auto it = find(empty_slots.begin(), empty_slots.end(), nearest);
-            int index = it - empty_slots.begin();
-            empty_slots.erase(empty_slots.begin() + index);
-            cout << "Your car "<< n <<" is parked at slot number " << nearest + 1 << endl;
-            j++;
+            if (!exists(n))
+            {
+                if (j < l)
+                {
+                    int nearest = *min_element(empty_slots.begin(), empty_slots.end()); // nearest available slot obtained
+                    slots[0].push_back(clr);
+                    slots[1].push_back(n);
+                    slots[2].push_back(to_string(nearest));
+                    auto it = find(empty_slots.begin(), empty_slots.end(), nearest);
+                    int index = it - empty_slots.begin();
+                    empty_slots.erase(empty_slots.begin() + index);
+                    cout << "Your car " << n << " is parked at slot number " << nearest + 1 << endl;
+                    j++;
+                }
+                else
+                    cout << "Sorry...Parking Lot is full!\n";
+            }
+            else
+                cout << "Car " << n << " already parked.\n";
         }
         else
-            cout << "Sorry...Parking Lot is full!\n";
+            cout << "Incorrect data!!\n";
     }
     void unpark(string n)
     {
@@ -59,7 +110,7 @@ public:
             cout << "Oops!..No such car present.\n";
     }
 };
-class Details
+class Details : Valid
 {
 public:
     void findCar(string reg, int slot_number, bool flag)
@@ -71,8 +122,9 @@ public:
             {
                 if (reg.compare(slots[1][i]) == 0)
                 {
-                    cout << "Car colour is : " << slots[0][i] << endl;
-                    cout << "Slot number is : " << stoi(slots[2][i]) + 1 << endl;
+                    cout << "Car number " << reg << " : " << endl;
+                    cout << "Colour of " << slots[1][i] << " is : " << slots[0][i] << endl;
+                    cout << "Slot number of " << slots[1][i] << " is : " << stoi(slots[2][i]) + 1 << endl;
                     found = true;
                     break;
                 }
@@ -81,86 +133,127 @@ public:
             {
                 if (to_string(slot_number - 1).compare(slots[2][i]) == 0)
                 {
+                    cout << "Slot " << slot_number << " : " << endl;
                     cout << "Car number is : " << slots[1][i] << endl;
-                    cout << "Car colour is : " << slots[0][i] << endl;
+                    cout << "Colour of " << slots[1][i] << " is : " << slots[0][i] << endl;
                     found = true;
                     break;
                 }
             }
         }
         if (found == false)
-        {
             cout << "Oops!..No data found.\n";
-        }
     }
     void findByClr(string clr)
     {
         bool found = false;
-        cout << "Registration number\t\tSlot\n";
-        for (size_t i = 0; i < j; i++)
+        bool check = checkColour(clr);
+        if (check)
         {
-            if (clr.compare(slots[0][i]) == 0)
+            cout << "Registration number\t\tSlot\n";
+            for (size_t i = 0; i < j; i++)
             {
-                cout << "   "<< slots[1][i] << "\t\t\t  " << stoi(slots[2][i]) + 1 << "\n";
-                found = true;
+                if (clr.compare(slots[0][i]) == 0)
+                {
+                    cout << "   " << slots[1][i] << "\t\t\t  " << stoi(slots[2][i]) + 1 << "\n";
+                    found = true;
+                }
             }
         }
         if (found == false)
-        {
-            cout << "     Oops!..No data found.\n";
-        }
+            cout << "Oops!..No data found.\n";
     }
 };
 int main(int argc, char *argv[])
 {
-    int n;
-    cout << "Enter capacity of Parking lot : ";
-    cin >> n;
     if (argc == 2)
     {
         fstream fio;
         string word;
         fio.open(argv[1], ios::in);
-        ParkingEntry obj(n);
-        Details ob;
-        string reg, clr;
-        while (fio >> word)
+        string reg, clr, temp;
+        fio >> word;
+        if (word.compare("create_parking_lot") == 0)
         {
-            if (word.compare("park") == 0)
+            fio >> word;
+            int n = stoi(word);
+            ParkingEntry obj(n);
+            Details ob;
+            while (fio >> word)
             {
-                fio >> reg;
-                fio >> clr;
-                obj.park(reg, clr, n);
+                if (word.compare("park") == 0)
+                {
+                    getline(fio, temp);
+                    if (countWords(temp) == 2)
+                    {
+                        istringstream ss(temp);
+                        ss >> reg;
+                        ss >> clr;
+                        obj.park(reg, clr, n);
+                    }
+                    else
+                        cout << "Insufficient data!!\n";
+                }
+                else if (word.compare("unpark") == 0)
+                {
+                    getline(fio, temp);
+                    if (countWords(temp) == 1)
+                    {
+                        istringstream ss(temp);
+                        ss >> reg;
+                        obj.unpark(reg);
+                    }
+                    else
+                        cout << "Insufficient data!!\n";
+                }
+                else if (word.compare("find_parking_slot") == 0)
+                {
+                    getline(fio, temp);
+                    if (countWords(temp) == 1)
+                    {
+                        istringstream ss(temp);
+                        ss >> temp;
+                        ob.findCar("", stoi(temp), false);
+                    }
+                    else
+                        cout << "Insufficient data!!\n";
+                }
+                else if (word.compare("find_car_number") == 0)
+                {
+                    getline(fio, temp);
+                    if (countWords(temp) == 1)
+                    {
+                        istringstream ss(temp);
+                        ss >> reg;
+                        ob.findCar(reg, 0, true);
+                    }
+                    else
+                        cout << "Insufficient data!!\n";
+                }
+                else if (word.compare("find_car") == 0)
+                {
+                    getline(fio, temp);
+                    if (countWords(temp) == 1)
+                    {
+                        istringstream ss(temp);
+                        ss >> clr;
+                        ob.findByClr(clr);
+                    }
+                    else
+                        cout << "Insufficient data!!\n";
+                }
+                else
+                    cout << "Invalid input.\n";
             }
-            else if (word.compare("unpark") == 0)
-            {
-                fio >> reg;
-                obj.unpark(reg);
-            }
-            else if (word.compare("find_car_in_slot") == 0)
-            {
-                int slot;
-                string sl;
-                fio >> sl;
-                slot = stoi(sl);
-                ob.findCar("", slot, false);
-            }
-            else if (word.compare("find_car_by_number") == 0)
-            {
-                fio >> reg;
-                ob.findCar(reg, 0, true);
-            }
-            else if (word.compare("find_by_colour") == 0)
-            {
-                fio >> clr;
-                ob.findByClr(clr);
-            }
-            else
-                cout << "Invalid input.\n";
         }
+        else
+            cout << "Error : Wrong command.\n";
     }
     else
     {
+        int n;
+        cout << "Enter capacity of Parking lot : ";
+        cin >> n;
         int res;
         ParkingEntry obj(n);
         Details ob;
