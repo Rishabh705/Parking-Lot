@@ -251,57 +251,63 @@ int main(int argc, char *argv[])
     }
     else
     {
-        int n;
-        cout << "Enter capacity of Parking lot : ";
-        cin >> n;
-        int res;
-        ParkingEntry obj(n);
-        Details ob;
-        do
+        string line, word, reg, clr;
+        cout << "Create parking lot or type 'quit' to exit\n";
+        getline(cin, line);
+        stringstream iss(line);
+        iss >> word;
+        if (word.compare("create_parking_lot") == 0)
         {
-            cout << "\n1.Park car.\n";
-            cout << "2.Unpark car.\n";
-            cout << "3.Find car in slot.\n";
-            cout << "4.Find car by number.\n";
-            cout << "5.Find car(s) by colour.\n";
-            cout << "Enter your choice : ";
-            cin >> res;
-            string reg, clr;
-            if (res == 1)
+            cout << "Parking lot created.\n";
+            iss >> word;
+            int n = stoi(word);
+            ParkingEntry obj(n);
+            Details ob;
+            while (1)
             {
-                cout << "\nEnter car number : ";
-                cin >> reg;
-                cout << "\nEnter car colour : ";
-                cin >> clr;
-                obj.park(reg, clr, n);
+                cout << "\nEnter command or type 'quit' to exit\n";
+                getline(cin, line);
+                stringstream iss(line);
+                iss >> word;
+                if (word.compare("park") == 0 && countWords(line)==3)
+                {
+                    iss >> reg;
+                    iss >> clr;
+                    obj.park(reg, clr, n);
+                }
+                else if (word.compare("unpark") == 0)
+                {
+                    iss >> reg;
+                    obj.unpark(reg);
+                }
+                else if (word.compare("find_parking_slot") == 0)
+                {
+                    iss >> reg;
+                    ob.findCar("", stoi(reg), false);
+                }
+                else if (word.compare("find_car_number") == 0)
+                {
+                    iss >> reg;
+                    ob.findCar(reg, 0, true);
+                }
+                else if (word.compare("find_car") == 0)
+                {
+                    iss >> clr;
+                    ob.findByClr(clr);
+                }
+                else if (lower(word).compare("quit") == 0)
+                {
+                    cout << "Exiting...\n";
+                    break;
+                }
+                else
+                    cout << "Error : Inappropriate command\n";
             }
-            else if (res == 2)
-            {
-                cout << "\nEnter car number : ";
-                cin >> reg;
-                obj.unpark(reg);
-            }
-            else if (res == 3)
-            {
-                int slot;
-                cout << "\nEnter slot number : ";
-                cin >> slot;
-                ob.findCar("", slot, false);
-            }
-            else if (res == 4)
-            {
-                cout << "\nEnter car number : ";
-                cin >> reg;
-                ob.findCar(reg, 0, true);
-            }
-            else if (res == 5)
-            {
-                cout << "\nEnter car colour : ";
-                cin >> clr;
-                ob.findByClr(clr);
-            }
-        } while (res != 0);
+        }
+        else if (lower(word).compare("quit") == 0)
+            cout << "Thank you\n";
+        else
+            cout << "Error : Inappropriate command or Parking Lot not created\n";
     }
-    cout << "Thank You\n";
     return 0;
 }
